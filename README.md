@@ -19,7 +19,9 @@ The original version is extended with
 
 It should be done each time when the source code is changed and the changes should be propagated to the docker image.
 Run the following to create *teamcitytheatre* Docker image:
- docker build -t teamcitytheatre .
+```
+docker build -t teamcitytheatre .
+```
 Initially it can take several minutes but next calls thanks to Docker's caching system should be much faster.
 
 ## STEP 2 Prepare configuration
