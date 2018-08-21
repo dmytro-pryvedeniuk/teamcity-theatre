@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using TeamCityTheatre.Core.ApplicationModels;
@@ -13,6 +14,8 @@ namespace TeamCityTheatre.Core.Repositories {
   public class ConfigurationRepository : IConfigurationRepository {
     readonly DirectoryInfo _workspace;
     readonly FileInfo _configurationFile;
+    private DateTime _lastWriteTime;
+    private Configuration _lastConfiguration;
 
     public ConfigurationRepository(IOptionsSnapshot<StorageOptions> storageOptionsSnapshot) {
       var storageOptions = storageOptionsSnapshot.Value;
@@ -22,7 +25,15 @@ namespace TeamCityTheatre.Core.Repositories {
 
     public Configuration GetConfiguration() {
       EnsureConfigurationFileExists();
-      return JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(_configurationFile.FullName)) ?? new Configuration();
+
+      var currentWriteTime = File.GetLastWriteTime(_configurationFile.FullName);
+      if (currentWriteTime == _lastWriteTime)
+      {
+        return _lastConfiguration;        
+      }
+      _lastConfiguration = JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(_configurationFile.FullName)) ?? new Configuration();
+      _lastWriteTime = currentWriteTime;
+      return _lastConfiguration;
     }
 
     public void SaveConfiguration(Configuration configuration) {
