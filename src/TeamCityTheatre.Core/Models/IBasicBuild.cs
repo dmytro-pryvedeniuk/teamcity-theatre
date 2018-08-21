@@ -19,5 +19,6 @@ namespace TeamCityTheatre.Core.Models {
     bool IsDefaultBranch { get; }
     string Href { get; }
     string WebUrl { get; }
+    string DisplayBranchName { get; set; }
   }
 }

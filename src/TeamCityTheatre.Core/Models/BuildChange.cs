@@ -8,6 +8,7 @@ namespace TeamCityTheatre.Core.Models {
     public DateTime Date { get; set; }
     public string Href { get; set; }
     public string WebLink { get; set; }
+    public string UserImageUrl { get; set; }
 
     public override string ToString() {
       return string.Format("Id: {0}, Version: {1}, Username: {2}, Date: {3}", Id, Version, Username, Date);

@@ -14,5 +14,6 @@ namespace TeamCityTheatre.Core.Models {
     DateTime Date { get; set; }
     string Href { get; set; }
     string WebLink { get; set; }
+    string UserImageUrl { get; set; }
   }
 }

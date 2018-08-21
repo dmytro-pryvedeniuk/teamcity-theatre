@@ -41,6 +41,7 @@ export interface IBasicBuild {
   isDefaultBranch: boolean;
   href: string;
   webUrl: string;
+  displayBranchName: string;
 }
 
 export interface IDetailedBuild extends IBasicBuild {
@@ -78,6 +79,7 @@ export interface IDetailedBuildChange {
   date: string;
   href: string;
   webLink: string;
+  userImageUrl: string;
 }
 
 export interface IBasicAgent {

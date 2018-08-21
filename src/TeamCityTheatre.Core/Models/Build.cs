@@ -26,6 +26,7 @@ namespace TeamCityTheatre.Core.Models {
     public IReadOnlyCollection<Property> Properties { get; set; }
     public IReadOnlyCollection<IBasicBuild> SnapshotDependencies { get; set; }
     public IReadOnlyCollection<IBasicBuild> ArtifactDependencies { get; set; }
+    public string DisplayBranchName { get; set; }
 
     public override string ToString() {
       return string.Format("Id: {0}, BuildConfigurationId: {1}, Number: {2}, Status: {3}, State: {4}", Id,

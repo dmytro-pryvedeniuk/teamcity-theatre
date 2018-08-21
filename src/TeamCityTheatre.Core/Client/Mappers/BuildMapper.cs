@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using TeamCityTheatre.Core.Client.Responses;
 using TeamCityTheatre.Core.Models;
 
-namespace TeamCityTheatre.Core.Client.Mappers {
-  public interface IBuildMapper {
+namespace TeamCityTheatre.Core.Client.Mappers
+{
+  public interface IBuildMapper
+  {
     Build Map(BuildResponse build);
     IReadOnlyCollection<Build> Map(BuildsResponse builds);
   }
 
-  public class BuildMapper : IBuildMapper {
+  public class BuildMapper : IBuildMapper
+  {
     readonly IAgentMapper _agentMapper;
     readonly IBuildStatusMapper _buildStatusMapper;
     readonly IBuildChangeMapper _buildChangeMapper;
@@ -20,7 +24,8 @@ namespace TeamCityTheatre.Core.Client.Mappers {
     public BuildMapper(
       IBuildConfigurationMapper buildConfigurationMapper, IBuildChangeMapper buildChangeMapper,
       IPropertyMapper propertyMapper,
-      IAgentMapper agentMapper, IBuildStatusMapper buildStatusMapper) {
+      IAgentMapper agentMapper, IBuildStatusMapper buildStatusMapper)
+    {
       _buildConfigurationMapper = buildConfigurationMapper ?? throw new ArgumentNullException(nameof(buildConfigurationMapper));
       _buildChangeMapper = buildChangeMapper ?? throw new ArgumentNullException(nameof(buildChangeMapper));
       _propertyMapper = propertyMapper ?? throw new ArgumentNullException(nameof(propertyMapper));
@@ -28,9 +33,11 @@ namespace TeamCityTheatre.Core.Client.Mappers {
       _buildStatusMapper = buildStatusMapper ?? throw new ArgumentNullException(nameof(buildStatusMapper));
     }
 
-    public Build Map(BuildResponse build) {
+    public Build Map(BuildResponse build)
+    {
       if (build == null) return null;
-      return new Build {
+      return new Build
+      {
         Id = build.Id,
         BuildConfigurationId = build.BuildTypeId,
         Agent = _agentMapper.Map(build.Agent),
@@ -53,11 +60,24 @@ namespace TeamCityTheatre.Core.Client.Mappers {
         State = build.State,
         Status = _buildStatusMapper.Map(build.Status),
         StatusText = build.StatusText,
-        WebUrl = build.WebUrl
+        WebUrl = build.WebUrl,
+        DisplayBranchName = GetDisplayBranchName(build.BranchName)
       };
     }
 
-    public IReadOnlyCollection<Build> Map(BuildsResponse builds) {
+    private string GetDisplayBranchName(string branchName)
+    {
+      var phxMatch = Regex.Match(branchName, @"(PHX.\d+)");
+      if (phxMatch.Success)
+        return phxMatch.Value;
+      if (branchName == "refs/heads/master")
+        return "master";
+
+      return branchName;
+    }
+
+    public IReadOnlyCollection<Build> Map(BuildsResponse builds)
+    {
       if (builds?.Build == null)
         return new List<Build>();
       return builds.Build.Select(Map).ToList();

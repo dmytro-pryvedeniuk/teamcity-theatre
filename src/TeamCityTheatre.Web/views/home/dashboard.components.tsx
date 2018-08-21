@@ -11,18 +11,18 @@ export const Dashboard =
   (props: { views: IView[] | null, selectedView: IView | null, selectedViewData: IViewData | null }) => {
     if (props.views === null)
       return <div>
-               <i className="fa fa-spin fa-cog"/> Loading views
+        <i className="fa fa-spin fa-cog" /> Loading views
              </div>;
 
     if (props.selectedView === null)
-      return <Views views={props.views}/>;
+      return <Views views={props.views} />;
 
     if (props.selectedViewData === null)
       return <div>
-               <i className="fa fa-spin fa-cog"/> Loading view data
+        <i className="fa fa-spin fa-cog" /> Loading view data
              </div>;
 
-    return <View view={props.selectedView} data={props.selectedViewData}/>;
+    return <View view={props.selectedView} data={props.selectedViewData} />;
   };
 
 /**
@@ -51,11 +51,11 @@ const tryRequestFullScreen = (event: MouseEvent<HTMLButtonElement>) => {
 const View = (props: { view: IView, data: IViewData }) => (
   <div className="view" id={props.view.id}>
     <button role="button" className="btn btn-primary btn-xs" onClick={tryRequestFullScreen}>
-      <i className="fa fa-expand"/> Full screen
+      <i className="fa fa-expand" /> Full screen
     </button>
     <div id="tiles">
       <div className="tiles-wrapper">
-        {props.data.tiles.map(tile => <Tile key={tile.id} view={props.view} data={tile}/>) }
+        {props.data.tiles.map(tile => <Tile key={tile.id} view={props.view} data={tile} />)}
       </div>
     </div>
   </div>
@@ -73,7 +73,7 @@ const Tile = (props: { view: IView, data: ITileData }) => {
     <div id={props.data.id} className={`tile ${buildStatus} ${height} ${width}`}>
       <h4 className="tile-title">{props.data.label}</h4>
       <div className="tile-builds">
-        { props.data.builds.map(build => <Build key={build.id} build={build} />) }
+        {props.data.builds.map(build => <Build key={build.id} build={build} />)}
       </div>
     </div>
   );
@@ -98,9 +98,13 @@ const Build = (props: { build: IDetailedBuild }) => {
       <div className="progress">
         <a href={build.webUrl} target="_blank">
           <div className={`progress-bar ${progressBarTheme} ${progressBarAnimation}`} style={{ width: `${percentageCompleted}%` }}>
-            {<Branch build={build} />}
-            {isFinished ? <FinishDate build={build} /> : null}
-            {isRunning ? <TimeRemaining build={build} /> : null }
+            {<UserImage build={build} />}
+            <div className="buildCaption">
+              {<Branch build={build} />}
+              {isFinished ? <FinishDate build={build} /> : null}
+              {isRunning ? <TimeRemaining build={build} /> : null}
+              {<UserName build={build} />}
+            </div>
           </div>
         </a>
       </div>
@@ -110,11 +114,29 @@ const Build = (props: { build: IDetailedBuild }) => {
 
 const Branch = (props: { build: IDetailedBuild }) => {
   const isDefaultBranch = props.build.isDefaultBranch;
-  const branchDisplayName = props.build.branchName || props.build.number;
+  const displayBranchName = props.build.displayBranchName;
   return isDefaultBranch
-    ? <span className="branch"><i className="fa fa-star"/> {branchDisplayName}</span>
-    : <span className="branch">{branchDisplayName}</span>;
+    ? <span className="branch"><i className="fa fa-star" /> {displayBranchName}</span>
+    : <span className="branch">{displayBranchName}</span>;
 };
+
+const UserName = (props: { build: IDetailedBuild }) => {
+  if (props.build.lastChanges && props.build.lastChanges.length > 0) {
+    const userName = props.build.lastChanges[0].username;
+    if (userName)
+      return <span className="remaining">{userName}</span>;
+  }
+  return (null);
+}
+
+const UserImage = (props: { build: IDetailedBuild }) => {
+  if (props.build.lastChanges && props.build.lastChanges.length > 0) {
+    const imageSource = props.build.lastChanges[0].userImageUrl;
+    if (imageSource)
+      return <img className="imgUserImage" src={imageSource} />;
+  }
+  return (null);
+}
 
 const FinishDate = (props: { build: IDetailedBuild }) => {
   const { build } = props;
