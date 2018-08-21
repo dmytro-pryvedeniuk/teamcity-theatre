@@ -1,0 +1,8 @@
+ # Sample contents of .dockerignore file
+ **/bin
+ **/obj
+ **/node_modules
+ .git
+ **/.vs
+ publish-output
+ dockerignore
