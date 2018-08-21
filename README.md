@@ -1,76 +1,90 @@
-# TeamCity Theatre 
+See https://github.com/amoerie/teamcity-theatre for more info about TeamCity Theatre.
 
-[![Build Status](https://travis-ci.org/amoerie/teamcity-theatre.svg?branch=master)](https://travis-ci.org/amoerie/teamcity-theatre)
+The original version is extended with 
+- Docker support
+- User settings (images, names)
+- Some optimizations
 
-A .NET MVC web application to monitor your TeamCity builds. 
-Stick a TV on the wall, open a browser there and enjoy your TeamCity projects in all their red and green glory.
+## Install Docker for Windows
 
-## Screenies
+ Depending on your system setup it can be https://docs.docker.com/toolbox/toolbox_install_windows/ or https://docs.docker.com/docker-for-windows/
+ (This solution has been developed using the legacy Docker Toolbox and has not been tried with Docker for Windows).
+ With Docker Toolbox install run Docker commands in the "Docker Quickstart Terminal". 
+ Ensure that the current directory in your terminal is the directory where *dockerfile* is located, e.g.
+```
+ cd 'e:\src\teamcitytheatre'
+```
 
-### The home page: choose your team
-![Choose your team](http://i.imgur.com/64YxBRb.png)
+## STEP 1 Build the image
 
-### Team view
-![The dashboard screen](http://i.imgur.com/izZiWVd.png)
+It should be done each time when the source code is changed and the changes should be propagated to the docker image.
+Run the following to create *teamcitytheatre* Docker image:
+ docker build -t teamcitytheatre .
+Initially it can take several minutes but next calls thanks to Docker's caching system should be much faster.
 
-### Configuration: manage your views and their tiles
-![The config screen](http://i.imgur.com/4Rg4yi6.png)
+## STEP 2 Prepare configuration
 
-## Features
+Before starting the container some configuration is required
+a) Configure your TC server in *docker-compose.yml* file, e.g.
+```
+    environment:
+    - Connection:Url=https://teamcity.jetbrains.com
+    - Connection:Username=guest
+    - Connection:Password=
+```
+b) FYI Pay attention to the volumes in *docker-compose.yml* file 
+```
+    volumes:
+    - $HOME/teamcitytheatre:/app/config
+    - $HOME/teamcitytheatre/users:/app/wwwroot/users
+```
+The volumes above are used to map the host's $HOME directory (on Windows it's C:\users\<current user>\) so it will be available in the Docker guest system. 
+It allows to stop/remove the containers but keep the configuration alive.
+```
+    - Storage:ConfigurationFile=/app/config/configuration.json
+    - Serilog:1:Args:path=/app/config/logs/TeamCityTheatre.Web-.log 
+```
+c) User images should be placed to $HOME/teamcitytheatre/users directory (e.g. c:\users\<current user>\teamcitytheatre\users) on the host system. 
 
-- First-class support for branches! (This is a feature many others are lacking)
-- Create multiple dashboards, one for each team!
-- Customizable amount of branches shown per tile
-- Customizable amount of columns shown per view, make optimal use of the size of your wall TV!
-- Customizable labels on tiles
-
-## Requirements
-
-- A TeamCity server (d'uh). TeamCityTheatre is confirmed to be compatible with 2017.1.4 (build 47070). Other versions may or may not work, JetBrains likes to break its own APIs from time to time.
-- A Windows Server with IIS to host the web application, or your Windows dev machine if you just want to try it out.
-- .NET Core Runtime 2.x (downloadable from https://www.microsoft.com/net/download/all )
-- .NET Core Windows Hosting Bundle (downloadable from the same page you downloaded the runtime from )
-- Some knowledge on how to add a .NET web application in IIS, or the willingness to learn.
-- A nice cup of coffee to drink while you install this. 
-
-## Installation instructions
-
-### Windows IIS
-
-1. Download and unzip the [the latest release](https://github.com/amoerie/teamcity-theatre/releases)
-2. Add the following to the `appsettings.json` file:
+d) Having the images in the *users* directory (again, c:\users\<current user>\teamcitytheatre\users) allows to use the relative mapping in *configuration.json* file. 
+Also you can specify the complete URL to the image as shown below.
 
 ```
-  "Connection": {
-    "Url": "http://your-teamcity-server/",
-    "Username": "your-teamcity-username",
-    "Password": "your-teamcity-password"
+... 
+  "UserSettings": {
+    "Users": [
+      {
+        "Name": "user1",
+        "ImageUrl": "http://www.networkfp.com/wp-content/uploads/2016/08/man-1.jpg"
+      },
+      {
+        "Name": "matt2",
+        "ImageUrl": "/users/matt2.jpg"
+      }
+    ],
+    "NullImageUrl": "/users/hamster.jpg"
   }
+}
 ```
 
-4. (Optional) Change the location of the configuration.json file or leave the default
-5. (Optional) Change the logging configuration. It's quite verbose by default, but will never take more than 75MB of space.
-5. Install this folder as a web application in IIS:
-  - Application pool should use .NET CLR version 'No Managed Code'
-  - Application pool should use Managed Pipeline mode 'Integrated'
-  
-## Usage instructions
+e) *docker-compose.yml* also contains port mapping, so the port 80 on the guest system is mapped to the port 5000 on the host system.
+You can use any other port in case of any possible collision.
 
-Open the web application from a browser
-  - Make sure that you type the URL in lowercase
-  - Open the settings page from the main menu. 
-    - If you see any errors, your server or credentials might be incorrect. Check the log files why the network request failed.
-  - Add a new view, give it a name.
-  - Expand your TeamCity projects in the left bottom pane and select one to see its build configurations.
-  - Add build configurations to your view. These will become the tiles of your view.
-  - Open the dashboard from the main menu and select your view
-  - Wait for the data to load. 
-  - Enjoy.
+f) To access the app you need to know IP address of the container.
+To get the IP with Docker Toolbox use the following command
+ docker-machine ip default
 
-## Compilation instructions
+## STEP 3 Enjoy docker-compose
+Just run 
+```
+ docker-compose up
+```
+to build/start the container
+and 
+```
+ docker-compose down 
+```
+to stop it. 
 
-1. Ensure you have [.NET Core SDK 2.x](https://www.microsoft.com/net/download/core) installed
-2. Ensure you have [Yarn](https://yarnpkg.com) installed
-3. Execute "publish.cmd" or "publish.sh" (.cmd for Windows)
-4. If all goes well, that should create a folder 'publish-output' which is all you need to host the application. See Installation instructions from here.
-
+## STEP 4 Use teamcitytheatre running in your container
+Open http://<IP_OF_YOUR_RUNNING_CONTAINER>:5000 in the web browser.
