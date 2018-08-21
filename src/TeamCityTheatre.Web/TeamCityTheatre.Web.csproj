@@ -20,7 +20,7 @@
   <ItemGroup>
     <Content Include="appsettings.json" CopyToPublishDirectory="Always" />
     <Content Include="wwwroot\**\*" CopyToPublishDirectory="Always" />
-    <Content Include="views\**\*.cshtml" CopyToPublishDirectory="Always" />
+    <Content Include="Views\**\*.cshtml" CopyToPublishDirectory="Always" />
   </ItemGroup>
 
   <ItemGroup>
