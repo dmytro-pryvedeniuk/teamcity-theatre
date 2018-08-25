@@ -1,0 +1,20 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TeamCity Theatre</title>
+  <base href="@Url.Content("~/")"/>
+  <link asp-append-version="true" rel="stylesheet" href="~/css/bootstrap.min.css"/>
+  <link asp-append-version="true" rel="stylesheet" href="~/css/font-awesome.min.css"/>
+  @RenderSection("styles", required:false)
+</head>
+<body>
+@{ Html.RenderPartial("_nav"); }
+<div id="body" class="container-fluid">
+  @RenderBody()
+</div>
+<script asp-append-version="true" src="~/js/vendor.js"></script>
+@RenderSection("scripts", required: false)
+</body>
+</html>
