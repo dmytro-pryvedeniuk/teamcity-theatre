@@ -1,5 +1,7 @@
 See https://github.com/amoerie/teamcity-theatre for more info about TeamCity Theatre.
 
+![TC](https://raw.githubusercontent.com/dmytro-pryvedeniuk/teamcity-theatre/5e42fc7cc4fd2ede5031151df8dbe22ab3020a97/TC.png)
+
 The original version is extended with 
 - Docker support
 - User settings (images, names)
