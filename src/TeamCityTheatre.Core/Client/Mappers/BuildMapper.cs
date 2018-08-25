@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using TeamCityTheatre.Core.Client.Responses;
 using TeamCityTheatre.Core.Models;
+using TeamCityTheatre.Core.Repositories;
 
 namespace TeamCityTheatre.Core.Client.Mappers
 {
@@ -17,6 +18,7 @@ namespace TeamCityTheatre.Core.Client.Mappers
   {
     readonly IAgentMapper _agentMapper;
     readonly IBuildStatusMapper _buildStatusMapper;
+    private readonly IConfigurationRepository _configurationRepository;
     readonly IBuildChangeMapper _buildChangeMapper;
     readonly IBuildConfigurationMapper _buildConfigurationMapper;
     readonly IPropertyMapper _propertyMapper;
@@ -24,13 +26,15 @@ namespace TeamCityTheatre.Core.Client.Mappers
     public BuildMapper(
       IBuildConfigurationMapper buildConfigurationMapper, IBuildChangeMapper buildChangeMapper,
       IPropertyMapper propertyMapper,
-      IAgentMapper agentMapper, IBuildStatusMapper buildStatusMapper)
+      IAgentMapper agentMapper, IBuildStatusMapper buildStatusMapper,
+      IConfigurationRepository configurationRepository)
     {
       _buildConfigurationMapper = buildConfigurationMapper ?? throw new ArgumentNullException(nameof(buildConfigurationMapper));
       _buildChangeMapper = buildChangeMapper ?? throw new ArgumentNullException(nameof(buildChangeMapper));
       _propertyMapper = propertyMapper ?? throw new ArgumentNullException(nameof(propertyMapper));
       _agentMapper = agentMapper ?? throw new ArgumentNullException(nameof(agentMapper));
       _buildStatusMapper = buildStatusMapper ?? throw new ArgumentNullException(nameof(buildStatusMapper));
+      _configurationRepository = configurationRepository ?? throw new ArgumentNullException(nameof(configurationRepository));
     }
 
     public Build Map(BuildResponse build)
@@ -67,11 +71,18 @@ namespace TeamCityTheatre.Core.Client.Mappers
 
     private string GetDisplayBranchName(string branchName)
     {
-      var phxMatch = Regex.Match(branchName, @"(PHX.\d+)");
-      if (phxMatch.Success)
-        return phxMatch.Value;
-      if (branchName == "refs/heads/master")
-        return "master";
+      var branches = _configurationRepository.GetConfiguration().DisplayBranches;
+
+      foreach (var branch in branches)
+      {
+        var phxMatch = Regex.Match(branchName, branch);
+        if (phxMatch.Success)
+        {
+          if (phxMatch.Groups.Count > 1)
+            return phxMatch.Groups[1].Value;
+          return phxMatch.Value;
+        }
+      }
 
       return branchName;
     }
