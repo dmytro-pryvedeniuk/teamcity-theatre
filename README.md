@@ -4,6 +4,7 @@ The original version is extended with
 - Docker support
 - User settings (images, names)
 - Some optimizations
+- Display branches
 
 ## Install Docker for Windows
 
@@ -27,6 +28,7 @@ Initially it can take several minutes but next calls thanks to Docker's caching 
 ## STEP 2 Prepare configuration
 
 Before starting the container some configuration is required
+
 a) Configure your TC server in *docker-compose.yml* file, e.g.
 ```
     environment:
@@ -34,6 +36,7 @@ a) Configure your TC server in *docker-compose.yml* file, e.g.
     - Connection:Username=guest
     - Connection:Password=
 ```
+
 b) FYI Pay attention to the volumes in *docker-compose.yml* file 
 ```
     volumes:
@@ -46,6 +49,7 @@ It allows to stop/remove the containers but keep the configuration alive.
     - Storage:ConfigurationFile=/app/config/configuration.json
     - Serilog:1:Args:path=/app/config/logs/TeamCityTheatre.Web-.log 
 ```
+
 c) User images should be placed to $HOME/teamcitytheatre/users directory (e.g. c:\users\<current user>\teamcitytheatre\users) on the host system. 
 
 d) Having the images in the *users* directory (again, c:\users\<current user>\teamcitytheatre\users) allows to use the relative mapping in *configuration.json* file. 
@@ -90,3 +94,17 @@ to stop it.
 
 ## STEP 4 Use teamcitytheatre running in your container
 Open http://<IP_OF_YOUR_RUNNING_CONTAINER>:5000 in the web browser.
+
+# Display branches
+One more small feature is a "display branch". A branch can contain some fixed text in the name which would be nice to exclude. E.g. instead of *refs/heads/1245* or *f/PHX-5555* or *heads/master* one may want to display just the significant parts, *1245*, *PHX-5555* and *master* correspondingly. To do it just use DisplayBranches in *configuration.json*.  
+
+```
+,
+  "DisplayBranches": [
+    "f/(PHX-.*)",
+    "refs/heads/(.*)",
+    "(master)",
+  ]
+}
+```
+These are the Regex strings with one Regex group. If the original branch name matches any string the extracted group is used in UI instead of the original branch name.
