@@ -2,12 +2,12 @@ version: '3'
 services:
   teamcitytheatre:
     container_name: tct
-    build: .
+    image: teamcitytheatre
     ports:
     - 5000:80
     volumes:
-    - $HOME/teamcitytheatre:/app/config
-    - $HOME/teamcitytheatre/users:/app/wwwroot/users
+    - ./config:/app/config
+    - ./config/users:/app/wwwroot/users
     environment:
     - Connection:Url=https://teamcity.jetbrains.com
     - Connection:Username=guest

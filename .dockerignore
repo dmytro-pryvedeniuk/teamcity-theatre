@@ -6,3 +6,4 @@
  **/.vs
  publish-output
  dockerignore
+ docker-compose.yml

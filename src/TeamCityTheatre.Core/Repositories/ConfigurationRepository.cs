@@ -12,40 +12,41 @@ namespace TeamCityTheatre.Core.Repositories {
   }
 
   public class ConfigurationRepository : IConfigurationRepository {
-    readonly DirectoryInfo _workspace;
-    readonly FileInfo _configurationFile;
+    readonly string _workspace;
+    readonly string _configurationFile;
     private DateTime _lastWriteTime;
     private Configuration _lastConfiguration;
 
     public ConfigurationRepository(IOptionsSnapshot<StorageOptions> storageOptionsSnapshot) {
       var storageOptions = storageOptionsSnapshot.Value;
-      _configurationFile = new FileInfo(storageOptions.ConfigurationFile);
-      _workspace = _configurationFile.Directory;
+      _configurationFile = storageOptions.ConfigurationFile;
+      _workspace = Path.GetDirectoryName(_configurationFile);
     }
 
     public Configuration GetConfiguration() {
       EnsureConfigurationFileExists();
 
-      var currentWriteTime = File.GetLastWriteTime(_configurationFile.FullName);
+      var currentWriteTime = File.GetLastWriteTime(_configurationFile);
       if (currentWriteTime == _lastWriteTime)
       {
         return _lastConfiguration;        
       }
-      _lastConfiguration = JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(_configurationFile.FullName)) ?? new Configuration();
+      _lastConfiguration = JsonConvert.DeserializeObject<Configuration>(
+        File.ReadAllText(_configurationFile)) ?? new Configuration();
       _lastWriteTime = currentWriteTime;
       return _lastConfiguration;
     }
 
     public void SaveConfiguration(Configuration configuration) {
       EnsureConfigurationFileExists();
-      File.WriteAllText(_configurationFile.FullName, JsonConvert.SerializeObject(configuration, Formatting.Indented));
+      File.WriteAllText(_configurationFile, JsonConvert.SerializeObject(configuration, Formatting.Indented));
     }
 
     void EnsureConfigurationFileExists() {
-      if (!_workspace.Exists)
-        _workspace.Create();
-      if (!_configurationFile.Exists)
-        _configurationFile.Create().Dispose();
+      if (!Directory.Exists(_workspace))
+        Directory.CreateDirectory(_workspace);
+      if (!File.Exists(_configurationFile))
+        File.Create(_configurationFile).Dispose();
     }
   }
 }
